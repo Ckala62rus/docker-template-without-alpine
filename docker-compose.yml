@@ -16,11 +16,38 @@ services:
       XDEBUG_CONFIG: client_host=host.docker.internal client_port=9000
       PHP_IDE_CONFIG: serverName=PHPSTORM
 
+  cron-new-template:
+    build: docker/cron
+    container_name: cron-new-template
+    working_dir: /var/www/
+    volumes:
+      - ./docker/php/config/php.ini:/usr/local/etc/php/conf.d/40-custom.ini
+      - ./backend/:/var/www/
+      - ./docker/php/logs/:/var/log/php/
+    depends_on:
+      - backend-new-template
+    environment:
+      XDEBUG_MODE: develop,debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9000
+      PHP_IDE_CONFIG: serverName=PHPSTORM
+
+  # docker exec -it supervisor /bin/sh
+  supervisor:
+    build:
+      context: .
+      dockerfile: docker/supervisor/supervisor.dockerfile
+    container_name: supervisor
+    volumes:
+      - ./backend:/var/www
+    depends_on:
+      - backend-new-template
+      - mysql-new-template
+
   nginx-new-template:
     image: nginx:1.21.1
     container_name: nginx-new-template
     ports:
-      - 80:80
+      - 81:80
     volumes:
       - ./docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
       - ./docker/nginx/config/conf.d/:/etc/nginx/conf.d
@@ -50,27 +77,6 @@ services:
       - MYSQL_USER=docker-boilerplate
       - MYSQL_PASSWORD=docker-boilerplate
 
-  phpmyadmin:
-    image: phpmyadmin
-    container_name: phpmyadmin-new-template
-    restart: always
-    ports:
-      - 8080:80
-    environment:
-      - PMA_ARBITRARY=1
-
-  # docker exec -it supervisor /bin/sh
-  supervisor:
-    build:
-      context: .
-      dockerfile: docker/supervisor/supervisor.dockerfile
-    container_name: supervisor
-    volumes:
-      - ./backend:/var/www
-    depends_on:
-      - backend-new-template
-      - mysql-new-template
-
   #https://hub.docker.com/r/bitnami/rabbitmq
   # rabbitmq:
   #   image: 'bitnami/rabbitmq:latest'
@@ -86,14 +92,3 @@ services:
   #   command: redis-server --requirepass 123123
   #   ports:
   #    - "6379:6379"
-
-  # https://github.com/aschmelyun/laravel-scheduled-tasks-docker
-  # cron:
-  #   build:
-  #     context: .
-  #     dockerfile: cron.dockerfile
-  #   container_name: cron
-  #   volumes:
-  #     - ./backend/:/var/www
-  #   depends_on:
-  #     - backend-laravel
