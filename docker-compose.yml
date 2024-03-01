@@ -77,6 +77,15 @@ services:
       - MYSQL_USER=docker-boilerplate
       - MYSQL_PASSWORD=docker-boilerplate
 
+  phpmyadmin-new-template:
+    image: phpmyadmin
+    container_name: phpmyadmin-new-template
+    restart: always
+    ports:
+      - 8080:80
+    environment:
+      - PMA_ARBITRARY=1
+
   #https://hub.docker.com/r/bitnami/rabbitmq
   # rabbitmq:
   #   image: 'bitnami/rabbitmq:latest'
