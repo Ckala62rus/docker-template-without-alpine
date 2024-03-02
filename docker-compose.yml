@@ -15,6 +15,8 @@ services:
       XDEBUG_MODE: develop,debug
       XDEBUG_CONFIG: client_host=host.docker.internal client_port=9000
       PHP_IDE_CONFIG: serverName=PHPSTORM
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
   cron-new-template:
     build: docker/cron
@@ -26,10 +28,6 @@ services:
       - ./docker/php/logs/:/var/log/php/
     depends_on:
       - backend-new-template
-    environment:
-      XDEBUG_MODE: develop,debug
-      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9000
-      PHP_IDE_CONFIG: serverName=PHPSTORM
 
   # docker exec -it supervisor /bin/sh
   supervisor:
@@ -39,15 +37,20 @@ services:
     container_name: supervisor
     volumes:
       - ./backend:/var/www
+    environment:
+      XDEBUG_MODE: develop,debug
+      XDEBUG_CONFIG: client_host=host.docker.internal client_port=9000
+      PHP_IDE_CONFIG: serverName=PHPSTORM
     depends_on:
       - backend-new-template
       - mysql-new-template
+      - rabbitmq-new-template
 
   nginx-new-template:
     image: nginx:1.21.1
     container_name: nginx-new-template
     ports:
-      - 81:80
+      - 80:80
     volumes:
       - ./docker/nginx/config/nginx.conf:/etc/nginx/nginx.conf
       - ./docker/nginx/config/conf.d/:/etc/nginx/conf.d
@@ -87,14 +90,15 @@ services:
       - PMA_ARBITRARY=1
 
   #https://hub.docker.com/r/bitnami/rabbitmq
-  # rabbitmq:
-  #   image: 'bitnami/rabbitmq:latest'
-  #   environment:
-  #     - RABBITMQ_PASSWORD=123123
-  #     - RABBITMQ_USERNAME=root
-  #   ports:
-  #     - 5672:5672 # for sender and consumer connections
-  #     - 15672:15672 # for serve RabbitMQ GUI
+  rabbitmq-new-template:
+    container_name: rabbitmq-new-template
+    image: 'bitnami/rabbitmq:latest'
+    environment:
+      - RABBITMQ_PASSWORD=123123
+      - RABBITMQ_USERNAME=root
+    ports:
+      - 5672:5672 # for sender and consumer connections
+      - 15672:15672 # for serve RabbitMQ GUI
 
   # redis:
   #   image: "redis:alpine"
