@@ -39,6 +39,9 @@ RUN docker-php-ext-install \
     exif \
     zip
 
+RUN pecl install redis \
+    # Redis is installed, enable it
+    && docker-php-ext-enable redis
 
 # Setup GD extension without alpine
 RUN apt-get update && \
