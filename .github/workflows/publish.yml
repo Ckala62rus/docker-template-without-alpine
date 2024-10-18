@@ -16,7 +16,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Publish to Registry ( fastapi_architecture_2024 )
+      - name: Publish to Registry ( docker_php_sqlsrv-backend-new-template )
         uses: docker/build-push-action@v4
         with:
           file: ./docker/php/Dockerfile
