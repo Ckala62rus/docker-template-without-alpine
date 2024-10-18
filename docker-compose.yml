@@ -2,6 +2,7 @@ version: '3.3'
 
 services:
   backend-new-template:
+    image: ckala62rus/docker_php_sqlsrv-backend-new-template
     build: docker/php
     container_name: backend-new-template
     working_dir: /var/www/
